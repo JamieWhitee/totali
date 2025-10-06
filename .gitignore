@@ -1,0 +1,73 @@
+# ================================
+# 只上传 frontend 和 backend 目录
+# Only upload frontend and backend directories
+# ================================
+
+# 忽略所有文件和目录
+/*
+
+# 但保留以下内容
+!frontend/
+!backend/
+!README.md
+!.gitignore
+
+# 环境变量文件 - Environment files
+.env
+.env.local
+.env*.local
+*.env
+
+# 依赖 - Dependencies  
+node_modules/
+.pnp
+.pnp.js
+
+# 构建输出 - Build outputs
+dist/
+build/
+out/
+.next/
+
+# 日志 - Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# IDE - 编辑器
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.swp
+*.swo
+*~
+.DS_Store
+
+# 测试 - Testing
+/coverage
+/.nyc_output
+
+# 临时文件 - Temp files
+.temp
+.tmp
+*.cache
+
+# 数据库 - Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Prisma
+/generated/prisma
+
+# 其他 - Misc
+*.pem
+.vercel
+*.tsbuildinfo
+next-env.d.ts

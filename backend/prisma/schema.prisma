@@ -1,0 +1,154 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ===========================================
+// 用户相关 - User Related
+// ===========================================
+
+// 用户表 - 仅存储 Supabase 用户的基本信息
+model User {
+  id        String   @id @default(uuid()) // 对应 Supabase auth.users.id
+  email     String   @unique
+  name      String?
+  avatarUrl String?  @map("avatar_url")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // 关联的业务数据
+  categories   Category[]
+  items        Item[]
+  usageRecords UsageRecord[]
+  aiQueries    AIQuery[]
+  settings     UserSettings?
+
+  @@map("users")
+}
+
+// 用户设置表 - 仅存储必要的用户偏好
+model UserSettings {
+  id            String   @id @default(uuid())
+  userId        String   @unique @map("user_id")
+  dailyReminder Boolean  @default(true) @map("daily_reminder")
+  reminderTime  String   @default("22:00") @map("reminder_time")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_settings")
+}
+
+// ===========================================
+// 物品管理 - Item Management
+// ===========================================
+
+// 物品分类表
+model Category {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  name      String
+  icon      String?  // 图标名称
+  isSystem  Boolean  @default(false) @map("is_system") // 是否为系统预设
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items Item[]
+
+  @@unique([userId, name]) // 同一用户下分类名唯一
+  @@map("categories")
+}
+
+// 物品表
+model Item {
+  id            String    @id @default(uuid())
+  userId        String    @map("user_id")
+  categoryId    String    @map("category_id")
+  name          String
+  purchasePrice Decimal   @map("purchase_price") @db.Decimal(10, 2)
+  purchaseDate  DateTime  @map("purchase_date")
+  expectedLife  Int?      @map("expected_life") // 预计使用天数（用于时间管理）
+  status        ItemStatus @default(ACTIVE)
+  notes         String?   // 备注信息
+  imageUrl      String?   @map("image_url")
+  
+  // 卖出相关字段
+  soldPrice     Decimal?  @map("sold_price") @db.Decimal(10, 2)
+  soldDate      DateTime? @map("sold_date")
+  
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  deletedAt     DateTime? @map("deleted_at") // 软删除
+
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category      Category      @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  usageRecords  UsageRecord[]
+  aiQueries     AIQuery[]
+
+  @@map("items")
+}
+
+// 物品状态枚举
+enum ItemStatus {
+  ACTIVE   // 服役中
+  RETIRED  // 已退役
+  SOLD     // 已卖出
+
+  @@map("item_status")
+}
+
+// ===========================================
+// 使用记录 - Usage Tracking
+// ===========================================
+
+// 使用记录表
+model UsageRecord {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  itemId    String   @map("item_id")
+  usageDate DateTime @map("usage_date") // 使用日期
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  item Item @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, itemId, usageDate]) // 同一用户同一物品同一天只能有一条记录
+  @@map("usage_records")
+}
+
+// ===========================================
+// AI查询 - AI Query
+// ===========================================
+
+// AI价格查询记录表
+model AIQuery {
+  id           String      @id @default(uuid())
+  userId       String      @map("user_id")
+  itemId       String      @map("item_id")
+  responsePrice Decimal?   @map("response_price") @db.Decimal(10, 2) // AI返回的价格
+  queryStatus  AIQueryStatus @map("query_status")
+  queryDate    DateTime    @default(now()) @map("query_date") // 查询日期
+  createdAt    DateTime    @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  item Item @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@map("ai_queries")
+}
+
+// AI查询状态枚举
+enum AIQueryStatus {
+  SUCCESS // 成功
+  FAILED  // 失败
+
+  @@map("ai_query_status")
+}
