@@ -6,9 +6,9 @@
 const https = require('https');
 const http = require('http');
 
-// 配置
-const SUPABASE_URL = 'https://sqncmyhrzigvebvvarbf.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNxbmNteWhyemlneWVidnZhcmJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjc1MDM1NjQsImV4cCI6MjA0MzA3OTU2NH0.J1yjoxLMOb1WNlYVqVR_8gUb-p9OQ8o9_7BRt6u8dqA';
+// 配置 - 从环境变量读取敏感信息
+const SUPABASE_URL = process.env.SUPABASE_URL || '';
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || '';
 const API_BASE_URL = 'http://localhost:3001/api/v1';
 
 // 颜色输出
