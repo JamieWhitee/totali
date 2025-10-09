@@ -168,3 +168,11 @@ export interface Auth0User extends ExternalAuthUser {
   email_verified: boolean;
   sub: string;
 }
+
+/**
+ * Express Request 扩展接口 - Extended Express Request interface
+ * 包含认证用户信息的请求对象 - Request object with authenticated user info
+ */
+export interface RequestWithUser extends Request {
+  user: AuthUser;
+}

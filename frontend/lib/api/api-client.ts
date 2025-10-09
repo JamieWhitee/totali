@@ -100,6 +100,22 @@ class ApiClient {
   }
 
   /**
+   * PATCH 请求 - PATCH request
+   */
+  async patch<T>(endpoint: string, data?: unknown): Promise<ApiResponse<T>> {
+    const headers = await this.getHeaders();
+    
+    const response = await fetch(`${this.baseURL}${endpoint}`, {
+      method: 'PATCH',
+      headers,
+      body: data ? JSON.stringify(data) : undefined,
+      credentials: 'include', // 包含 cookies - Include cookies
+    });
+
+    return this.handleResponse<T>(response);
+  }
+
+  /**
    * DELETE 请求 - DELETE request
    */
   async delete<T>(endpoint: string): Promise<ApiResponse<T>> {

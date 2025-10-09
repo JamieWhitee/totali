@@ -15,11 +15,24 @@ async function bootstrap() {
   // 创建应用实例
   const app = await NestFactory.create(AppModule, {
     logger: loggerConfig,
-    cors: true,
+    // 不在这里启用CORS，在后面统一配置
   });
 
-  // 安全头配置
-  app.use(helmet());
+  // CORS配置 - 必须在helmet之前配置
+  app.enableCors({
+    origin: ['http://localhost:3000', process.env.FRONTEND_URL || 'http://localhost:3000'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization'],
+    credentials: true,
+  });
+
+  // 安全头配置 - 配置helmet以允许CORS
+  app.use(
+    helmet({
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+      crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
+    })
+  );
 
   // 响应压缩
   app.use(compression());
@@ -46,14 +59,6 @@ async function bootstrap() {
 
   // 全局响应拦截器
   //app.useGlobalInterceptors(new ResponseInterceptor());
-
-  // CORS配置
-  app.enableCors({
-    origin: ['http://localhost:3000', process.env.FRONTEND_URL || 'http://localhost:3000'],
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization'],
-    credentials: true,
-  });
 
   // API前缀
   app.setGlobalPrefix('api/v1', {
