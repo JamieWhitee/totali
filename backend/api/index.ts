@@ -5,8 +5,8 @@ import { ValidationPipe, Logger } from '@nestjs/common';
 import { GlobalExceptionFilter } from '../src/common/filters/global-exception.filter';
 import express, { Request, Response } from 'express';
 import helmet from 'helmet';
-import * as compression from 'compression';
-import * as cookieParser from 'cookie-parser';
+import compression from 'compression';
+import cookieParser from 'cookie-parser';
 
 const server = express();
 let cachedApp: any = null;
