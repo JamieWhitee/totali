@@ -7,10 +7,8 @@ import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DatabaseModule } from './modules/database/database.module';
-import { CacheModule } from './modules/cache/cache.module';
 import appConfig from './config/app.config';
 import databaseConfig from './config/database.config';
-import redisConfig from './config/redis.config';
 import { AuthModule } from './modules/auth/auth.module';
 import { ItemsModule } from './modules/items/items.module';
 
@@ -18,11 +16,10 @@ import { ItemsModule } from './modules/items/items.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, databaseConfig, redisConfig],
+      load: [appConfig, databaseConfig],
       envFilePath: ['.env'],
     }),
     DatabaseModule,
-    CacheModule,
     AuthModule,
     ItemsModule,
   ],
