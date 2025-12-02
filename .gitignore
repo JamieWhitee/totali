@@ -10,6 +10,8 @@
 !frontend/
 !backend/
 !README.md
+!README.cn.md
+!INSTRUCTION.md
 !.gitignore
 
 # 环境变量文件 - Environment files
