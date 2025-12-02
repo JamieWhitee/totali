@@ -83,8 +83,8 @@ export default function HomePage() {
         sortOrder: 'desc' 
       });
 
-      if (response.success && response.data && response.data.items) {
-        setItems(prev => [...prev, ...response.data.items]);
+      if (response.success && response.data?.items) {
+        setItems(prev => [...prev, ...response.data!.items]);
         setCurrentPage(nextPage);
       }
     } catch (error) {
