@@ -56,3 +56,11 @@ pids
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 /generated/prisma
+
+# Temporary SQL migration scripts
+prisma/manual-schema.sql
+prisma/safe-schema.sql
+prisma/fix-categories.sql
+prisma/update-categories.sql
+prisma/final-fix.sql
+prisma/*.sql

@@ -54,15 +54,16 @@ model UserSettings {
 
 // 物品分类表
 model Category {
-  id        String   @id @default(uuid())
-  userId    String   @map("user_id")
-  name      String
-  icon      String?  // 图标名称
-  isSystem  Boolean  @default(false) @map("is_system") // 是否为系统预设
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id          String   @id @default(uuid())
+  userId      String?  @map("user_id") // 系统分类可以为 null
+  name        String
+  icon        String?  // 图标名称
+  description String?  // 分类描述
+  isSystem    Boolean  @default(false) @map("is_system") // 是否为系统预设
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
-  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user  User?  @relation(fields: [userId], references: [id], onDelete: Cascade)
   items Item[]
 
   @@unique([userId, name]) // 同一用户下分类名唯一
