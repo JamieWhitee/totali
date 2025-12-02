@@ -21,6 +21,8 @@ export default function HomePage() {
   const [items, setItems] = useState<ItemWithStats[]>([]);
   const [overview, setOverview] = useState<UserItemsOverview | null>(null);
   const [loadingData, setLoadingData] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
   // 检查登录状态，未登录则跳转到登录页
   useEffect(() => {
@@ -51,10 +53,10 @@ export default function HomePage() {
           setOverview(overviewResponse.data);
         }
       } catch (error) {
-        console.error('获取数据失败:', error);
+        console.error('Failed to fetch data:', error);
         toast({
-          title: '加载失败',
-          description: '无法加载数据，请刷新页面重试',
+          title: 'Failed to Load',
+          description: 'Unable to load data, please try again',
           variant: 'destructive',
         });
       } finally {
@@ -66,6 +68,36 @@ export default function HomePage() {
       fetchData();
     }
   }, [user, toast]);
+
+  // Load more items
+  const handleLoadMore = async () => {
+    if (!user || loadingMore) return;
+
+    try {
+      setLoadingMore(true);
+      const nextPage = currentPage + 1;
+      const response = await itemsApi.getItems({ 
+        page: nextPage, 
+        limit: 12, 
+        sortBy: 'createdAt', 
+        sortOrder: 'desc' 
+      });
+
+      if (response.success && response.data && response.data.items) {
+        setItems(prev => [...prev, ...response.data.items]);
+        setCurrentPage(nextPage);
+      }
+    } catch (error) {
+      console.error('Failed to load more items:', error);
+      toast({
+        title: 'Failed to Load More',
+        description: 'Unable to load more items',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoadingMore(false);
+    }
+  };
 
   const handleSignOut = async () => {
     try {
@@ -87,7 +119,7 @@ export default function HomePage() {
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto mb-4" />
-          <p className="text-sm text-muted-foreground">加载中...</p>
+          <p className="text-sm text-muted-foreground">Loading...</p>
         </div>
       </div>
     );
@@ -98,37 +130,37 @@ export default function HomePage() {
     return null;
   }
 
-  // 统计卡片数据
+  // Stats cards data
   const stats = [
     {
-      label: '资产总值',
+      label: 'Total Value',
       value: overview ? `¥${overview.totalValue.toFixed(0)}` : '¥0',
-      description: '所有物品购买价值总和',
+      description: 'Sum of all item purchase values',
     },
     {
-      label: '物品数量',
+      label: 'Total Items',
       value: overview ? overview.totalItems.toString() : '0',
-      description: `服役中 ${overview?.activeItems || 0} 件`,
+      description: `Active ${overview?.activeItems || 0} items`,
     },
     {
-      label: '平均日均成本',
+      label: 'Avg Daily Cost',
       value: overview ? `¥${overview.averageDailyCost.toFixed(2)}` : '¥0.00',
-      description: '所有物品平均每天成本',
+      description: 'Average daily cost of all items',
     },
     {
-      label: '已退役/已卖出',
+      label: 'Retired/Sold',
       value: overview ? `${overview.retiredItems + overview.soldItems}` : '0',
-      description: `退役 ${overview?.retiredItems || 0} / 卖出 ${overview?.soldItems || 0}`,
+      description: `Retired ${overview?.retiredItems || 0} / Sold ${overview?.soldItems || 0}`,
     },
   ];
 
-  // 获取状态标签
+  // Get status badge
   const getStatusBadge = (status: string) => {
     const statusMap = {
-      ACTIVE: { label: '服役中', variant: 'default' as const },
-      IDLE: { label: '闲置', variant: 'secondary' as const },
-      EXPIRED: { label: '已过期', variant: 'destructive' as const },
-      SOLD: { label: '已卖出', variant: 'outline' as const },
+      ACTIVE: { label: 'Active', variant: 'default' as const },
+      IDLE: { label: 'Idle', variant: 'secondary' as const },
+      EXPIRED: { label: 'Expired', variant: 'destructive' as const },
+      SOLD: { label: 'Sold', variant: 'outline' as const },
     };
     return statusMap[status as keyof typeof statusMap] || statusMap.ACTIVE;
   };
@@ -140,14 +172,14 @@ export default function HomePage() {
         <div className="container flex items-center justify-between px-4 py-8">
           <div>
             <h1 className="text-2xl font-semibold">
-              欢迎回来，{user?.user_metadata?.name || '用户'}
+              Welcome back, {user?.user_metadata?.name || 'User'}
             </h1>
-            <p className="mt-1 text-sm text-muted-foreground">今天是个管理物品的好日子 ✨</p>
+            <p className="mt-1 text-sm text-muted-foreground">A great day to manage your items ✨</p>
               </div>
           <div className="flex items-center gap-3">
             <Button variant="outline" size="sm" onClick={handleSignOut} className="gap-2">
               <LogOut className="h-4 w-4" />
-              登出
+              Sign Out
                   </Button>
             <Avatar className="h-14 w-14">
               <AvatarFallback className="text-2xl">
@@ -164,19 +196,19 @@ export default function HomePage() {
         <div className="mb-6 flex flex-wrap gap-2">
           <Button className="gap-2" onClick={() => router.push('/items/new')}>
             <Plus className="h-4 w-4" />
-            添加物品
+            Add Item
           </Button>
           <Button variant="outline" className="gap-2">
             <FileText className="h-4 w-4" />
-            使用记录
+            Usage Records
           </Button>
           <Button variant="outline" className="gap-2" onClick={() => router.push('/analytics')}>
             <BarChart3 className="h-4 w-4" />
-            数据分析
+            Analytics
           </Button>
           <Button variant="outline" className="gap-2">
             <Settings className="h-4 w-4" />
-            设置
+            Settings
           </Button>
         </div>
 
@@ -195,9 +227,9 @@ export default function HomePage() {
 
         {/* Items Section Header */}
         <div className="mb-4">
-          <h2 className="text-xl font-semibold">我的物品</h2>
+          <h2 className="text-xl font-semibold">My Items</h2>
           <p className="text-sm text-muted-foreground">
-            {items.length > 0 ? `共 ${overview?.totalItems || 0} 件物品` : '还没有添加任何物品'}
+            {items.length > 0 ? `Total ${overview?.totalItems || 0} items` : 'No items added yet'}
           </p>
         </div>
         <Separator className="mb-6" />
@@ -208,11 +240,11 @@ export default function HomePage() {
             <div className="rounded-full bg-muted p-6 mb-4">
               <Package className="h-12 w-12 text-muted-foreground" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">还没有物品</h3>
-            <p className="text-sm text-muted-foreground mb-6">开始添加您的第一件物品吧！</p>
+            <h3 className="text-lg font-semibold mb-2">No Items Yet</h3>
+            <p className="text-sm text-muted-foreground mb-6">Start by adding your first item!</p>
             <Button onClick={() => router.push('/items/new')}>
               <Plus className="mr-2 h-4 w-4" />
-              添加第一件物品
+              Add First Item
             </Button>
           </div>
         ) : (
@@ -221,7 +253,7 @@ export default function HomePage() {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {items.map((item) => {
                 const statusInfo = getStatusBadge(item.status);
-                const categoryIcon = item.category?.icon || '📦';
+                const itemIcon = item.icon || '📦';
 
                 return (
                   <Card
@@ -232,12 +264,12 @@ export default function HomePage() {
                     <CardHeader className="pb-3">
                       <div className="flex items-start gap-3">
                         <div className="flex h-14 w-14 items-center justify-center rounded-lg border bg-muted text-2xl">
-                          {categoryIcon}
+                          {itemIcon}
                         </div>
                         <div className="flex-1 min-w-0">
                           <CardTitle className="text-base truncate">{item.name}</CardTitle>
                           <p className="text-xs text-muted-foreground">
-                            {item.category?.name || '未分类'}
+                            {item.category?.name || 'Uncategorized'}
                           </p>
                         </div>
                       </div>
@@ -246,19 +278,19 @@ export default function HomePage() {
                       <div className="flex justify-center gap-6">
                         <div className="text-center">
                           <div className="text-lg font-semibold">¥{item.dailyCost.toFixed(1)}</div>
-                          <div className="text-xs text-muted-foreground">元/天</div>
+                          <div className="text-xs text-muted-foreground">/day</div>
                         </div>
                         <div className="text-center">
                           <div className="text-lg font-semibold">¥{item.purchasePrice}</div>
-                          <div className="text-xs text-muted-foreground">购买价</div>
+                          <div className="text-xs text-muted-foreground">Purchase</div>
                         </div>
                       </div>
                       <Separator />
                       <div className="space-y-1 text-sm">
-                        <div className="text-muted-foreground">已使用 {item.daysUsed} 天</div>
+                        <div className="text-muted-foreground">Used {item.daysUsed} days</div>
                         {item.usageEfficiency !== null && (
                           <div className="text-muted-foreground">
-                            效率: {(item.usageEfficiency * 100).toFixed(0)}%
+                            Efficiency: {(item.usageEfficiency * 100).toFixed(0)}%
                           </div>
                         )}
                       </div>
@@ -271,11 +303,15 @@ export default function HomePage() {
               })}
             </div>
 
-            {/* Load More (如果有更多物品) */}
+            {/* Load More (if there are more items) */}
             {overview && overview.totalItems > items.length && (
               <div className="mt-8 text-center">
-                <Button variant="outline" onClick={() => router.push('/items')}>
-                  查看所有物品 (显示 {items.length}/{overview.totalItems})
+                <Button 
+                  variant="outline" 
+                  onClick={handleLoadMore}
+                  disabled={loadingMore}
+                >
+                  {loadingMore ? 'Loading...' : `Load More (Showing ${items.length}/${overview.totalItems})`}
                 </Button>
               </div>
             )}

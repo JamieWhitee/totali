@@ -81,6 +81,7 @@ model Item {
   status        ItemStatus @default(ACTIVE)
   notes         String?   // 备注信息
   imageUrl      String?   @map("image_url")
+  icon          String?   @default("📦") // 物品图标
   
   // 卖出相关字段
   soldPrice     Decimal?  @map("sold_price") @db.Decimal(10, 2)

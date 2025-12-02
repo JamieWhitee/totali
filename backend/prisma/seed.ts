@@ -7,7 +7,7 @@ async function main() {
   console.log('Starting database initialization...');
 
   // 1. 创建系统用户（如果不存在）
-  const systemUserId = 'system-user-00000000-0000-0000-0000-000000000000';
+  const systemUserId = '00000000-0000-0000-0000-000000000000';
 
   const existingSystemUser = await prisma.user.findUnique({
     where: { id: systemUserId },
@@ -41,14 +41,17 @@ async function main() {
 
   for (const category of systemCategories) {
     // 检查分类是否已存在
-    const existingCategory = await prisma.category.findUnique({
-      where: { id: `sys-${category.name}` },
+    const existingCategory = await prisma.category.findFirst({
+      where: { 
+        name: category.name,
+        userId: systemUserId,
+        isSystem: true
+      },
     });
 
     if (!existingCategory) {
       await prisma.category.create({
         data: {
-          id: `sys-${category.name}`,
           userId: systemUserId, // 使用系统用户ID
           name: category.name,
           icon: category.icon,
@@ -62,7 +65,7 @@ async function main() {
   }
 
   // 3. 创建测试用户（可选）
-  const testUserId = '00000000-0000-0000-0000-000000000001';
+  const testUserId = '442db4ab-e498-4035-926d-2fcd13c34834';
   console.log('Checking test user...');
 
   const existingTestUser = await prisma.user.findUnique({
@@ -288,8 +291,8 @@ async function main() {
   console.log('🎉 Database initialization completed!');
   console.log('\n📝 Test account info:');
   console.log('  Email: test@totali.app');
-  console.log('  User ID: 00000000-0000-0000-0000-000000000001');
-  console.log('\n💡 Tip: Please create corresponding auth user in Supabase');
+  console.log('  User ID: 442db4ab-e498-4035-926d-2fcd13c34834');
+  console.log('\n💡 Tip: Auth user already exists in Supabase');
 }
 
 main()

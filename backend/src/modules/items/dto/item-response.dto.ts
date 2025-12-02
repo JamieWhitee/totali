@@ -37,6 +37,9 @@ export class ItemResponseDto {
   @ApiProperty({ description: '图片URL - Image URL', required: false })
   imageUrl: string | null;
 
+  @ApiProperty({ description: '物品图标 - Item icon', required: false })
+  icon: string | null;
+
   @ApiProperty({ description: '卖出价格 - Sold price', required: false })
   soldPrice: number | null;
 

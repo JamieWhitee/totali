@@ -31,9 +31,9 @@ export function DataTable<T extends object>({
   data,
   columns,
   searchKey,
-  searchPlaceholder = '搜索...',
+  searchPlaceholder = 'Search...',
   className,
-  emptyMessage = '暂无数据',
+  emptyMessage = 'No data',
 }: DataTableProps<T>) {
   const [searchValue, setSearchValue] = useState('');
 

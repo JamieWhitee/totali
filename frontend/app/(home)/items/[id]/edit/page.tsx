@@ -14,7 +14,15 @@ import { useAuth } from '@/lib/hooks/use-auth';
 import { itemsApi, type Category, type Item, type CreateItemDto } from '@/lib/api/items-api';
 import { useToast } from '@/hooks/use-toast';
 
-// 表单数据接口
+// Item icons list
+const ITEM_ICONS = [
+  '📱', '💻', '🖥️', '⌚', '🎧', '🔌',
+  '📺', '🎮', '📷', '🎒', '🧳', '👟',
+  '👗', '📚', '🪑', '🛏️', '🍳', '🔧',
+  '🪚', '🧰'
+];
+
+// Form data interface
 interface EditFormData {
   name: string;
   categoryId: string;
@@ -24,6 +32,7 @@ interface EditFormData {
   enableExpectedLife: boolean;
   notes: string;
   imageUrl: string;
+  icon: string;
 }
 
 export default function EditItemPage() {
@@ -34,13 +43,14 @@ export default function EditItemPage() {
 
   const itemId = params?.id as string;
 
-  // 状态管理
+  // State management
   const [item, setItem] = useState<Item | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [showIconPicker, setShowIconPicker] = useState(false);
 
-  // 表单数据
+  // Form data
   const [formData, setFormData] = useState<EditFormData>({
     name: '',
     categoryId: '',
@@ -50,21 +60,22 @@ export default function EditItemPage() {
     enableExpectedLife: false,
     notes: '',
     imageUrl: '',
+    icon: '📱',
   });
 
-  // 计算日均成本
+  // Calculate daily cost
   const dailyCost = formData.purchasePrice
     ? (parseFloat(formData.purchasePrice) / 365).toFixed(2)
     : '0.00';
 
-  // 检查登录状态
+  // Check login status
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/auth/signin');
     }
   }, [user, authLoading, router]);
 
-  // 获取分类列表和物品详情
+  // Fetch categories and item details
   useEffect(() => {
     const fetchData = async () => {
       if (!user || !itemId) return;
@@ -72,46 +83,47 @@ export default function EditItemPage() {
       try {
         setLoading(true);
 
-        // 并行获取分类和物品详情
+        // Fetch categories and item details in parallel
         const [categoriesRes, itemRes] = await Promise.all([
           itemsApi.getCategories(),
           itemsApi.getItem(itemId),
         ]);
 
-        // 处理分类
+        // Handle categories
         if (categoriesRes.success && categoriesRes.data) {
           setCategories(categoriesRes.data);
         }
 
-        // 处理物品详情
+        // Handle item details
         if (itemRes.success && itemRes.data) {
           const itemData = itemRes.data as Item;
           setItem(itemData);
 
-          // 填充表单
+          // Fill form
           setFormData({
             name: itemData.name,
             categoryId: itemData.categoryId,
             purchasePrice: itemData.purchasePrice.toString(),
-            purchaseDate: itemData.purchaseDate.split('T')[0], // 只取日期部分
+            purchaseDate: itemData.purchaseDate.split('T')[0], // Extract date only
             expectedLife: itemData.expectedLife ? itemData.expectedLife.toString() : '',
             enableExpectedLife: !!itemData.expectedLife,
             notes: itemData.notes || '',
             imageUrl: itemData.imageUrl || '',
+            icon: itemData.icon || '📦',
           });
         } else {
           toast({
-            title: '获取失败',
-            description: '无法获取物品信息',
+            title: 'Failed to Load',
+            description: 'Unable to load item information',
             variant: 'destructive',
           });
           router.push('/');
         }
       } catch (error) {
-        console.error('获取数据失败:', error);
+        console.error('Failed to fetch data:', error);
         toast({
-          title: '加载失败',
-          description: '无法加载数据，请重试',
+          title: 'Loading Failed',
+          description: 'Unable to load data, please try again',
           variant: 'destructive',
         });
         router.push('/');
@@ -125,18 +137,18 @@ export default function EditItemPage() {
     }
   }, [user, itemId, toast, router]);
 
-  // 更新表单字段
+  // Update form field
   const updateField = (field: keyof EditFormData, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  // 保存更新
+  // Save update
   const handleSave = async () => {
-    // 验证必填字段
+    // Validate required fields
     if (!formData.name || !formData.categoryId || !formData.purchasePrice || !formData.purchaseDate) {
       toast({
-        title: '验证失败',
-        description: '请填写所有必填字段',
+        title: 'Validation Failed',
+        description: 'Please fill in all required fields',
         variant: 'destructive',
       });
       return;
@@ -144,13 +156,14 @@ export default function EditItemPage() {
 
     setSaving(true);
     try {
-      const updateData: Partial<CreateItemDto> = {
+      const updateData: any = {
         name: formData.name,
         categoryId: formData.categoryId,
         purchasePrice: parseFloat(formData.purchasePrice),
         purchaseDate: formData.purchaseDate,
         notes: formData.notes || undefined,
         imageUrl: formData.imageUrl || undefined,
+        icon: formData.icon,
         expectedLife:
           formData.enableExpectedLife && formData.expectedLife
             ? parseInt(formData.expectedLife)
@@ -161,22 +174,22 @@ export default function EditItemPage() {
 
       if (response.success) {
         toast({
-          title: '更新成功',
-          description: '物品信息已成功更新',
+          title: 'Updated Successfully',
+          description: 'Item information has been updated',
         });
         router.push(`/items/${itemId}`);
       } else {
         toast({
-          title: '更新失败',
-          description: response.error || '未知错误',
+          title: 'Update Failed',
+          description: response.error || 'Unknown error',
           variant: 'destructive',
         });
       }
     } catch (error) {
-      console.error('更新物品失败:', error);
+      console.error('Failed to update item:', error);
       toast({
-        title: '更新失败',
-        description: '请检查网络连接后重试',
+        title: 'Update Failed',
+        description: 'Please check network connection and try again',
         variant: 'destructive',
       });
     } finally {
@@ -184,19 +197,19 @@ export default function EditItemPage() {
     }
   };
 
-  // 加载中
+  // Loading state
   if (loading || authLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto mb-4" />
-          <p className="text-sm text-muted-foreground">加载中...</p>
+          <p className="text-sm text-muted-foreground">Loading...</p>
         </div>
       </div>
     );
   }
 
-  // 未登录
+  // Not logged in
   if (!user || !item) {
     return null;
   }
@@ -208,11 +221,11 @@ export default function EditItemPage() {
         <div className="mb-6 flex items-center gap-4">
           <Button variant="outline" size="sm" onClick={() => router.push(`/items/${itemId}`)}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            返回
+            Back
           </Button>
           <div>
-            <h1 className="text-2xl font-semibold">编辑物品</h1>
-            <p className="text-sm text-muted-foreground">修改物品信息</p>
+            <h1 className="text-2xl font-semibold">Edit Item</h1>
+            <p className="text-sm text-muted-foreground">Modify item information</p>
           </div>
         </div>
 
@@ -221,24 +234,24 @@ export default function EditItemPage() {
           {/* 基础信息 */}
           <Card>
             <CardHeader>
-              <CardTitle>基础信息</CardTitle>
+              <CardTitle>Basic Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="name">物品名称 *</Label>
+                <Label htmlFor="name">Item Name *</Label>
                 <Input
                   id="name"
                   value={formData.name}
                   onChange={(e) => updateField('name', e.target.value)}
-                  placeholder="如：iPhone 15 Pro"
+                  placeholder="e.g., iPhone 15 Pro"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="category">分类 *</Label>
+                <Label htmlFor="category">Category *</Label>
                 <Select value={formData.categoryId} onValueChange={(value) => updateField('categoryId', value)}>
                   <SelectTrigger>
-                    <SelectValue placeholder="请选择分类" />
+                    <SelectValue placeholder="Please select a category" />
                   </SelectTrigger>
                   <SelectContent>
                     {categories.map((cat) => (
@@ -251,12 +264,12 @@ export default function EditItemPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="notes">备注</Label>
+                <Label htmlFor="notes">Notes</Label>
                 <Textarea
                   id="notes"
                   value={formData.notes}
                   onChange={(e) => updateField('notes', e.target.value)}
-                  placeholder="可选，简单描述该物品"
+                  placeholder="Optional, brief description of the item"
                   rows={3}
                 />
               </div>
@@ -266,12 +279,12 @@ export default function EditItemPage() {
           {/* 购买与保修 */}
           <Card>
             <CardHeader>
-              <CardTitle>购买信息</CardTitle>
+              <CardTitle>Purchase Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="purchasePrice">购买价格 *</Label>
+                  <Label htmlFor="purchasePrice">Purchase Price *</Label>
                   <Input
                     id="purchasePrice"
                     type="number"
@@ -281,7 +294,7 @@ export default function EditItemPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="purchaseDate">购买日期 *</Label>
+                  <Label htmlFor="purchaseDate">Purchase Date *</Label>
                   <Input
                     id="purchaseDate"
                     type="date"
@@ -299,7 +312,7 @@ export default function EditItemPage() {
                     onCheckedChange={(checked) => updateField('enableExpectedLife', checked as boolean)}
                   />
                   <Label htmlFor="enableExpectedLife" className="font-normal cursor-pointer">
-                    启用预计使用时间
+                    Enable expected lifespan
                   </Label>
                 </div>
                 {formData.enableExpectedLife && (
@@ -308,16 +321,16 @@ export default function EditItemPage() {
                     type="number"
                     value={formData.expectedLife}
                     onChange={(e) => updateField('expectedLife', e.target.value)}
-                    placeholder="预计使用天数"
+                    placeholder="Expected days of use"
                   />
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="dailyCost">日均成本（自动估算）</Label>
+                <Label htmlFor="dailyCost">Daily Cost (Auto-calculated)</Label>
                 <Input
                   id="dailyCost"
-                  value={dailyCost ? `¥${dailyCost}/天` : ''}
+                  value={dailyCost ? `¥${dailyCost}/day` : ''}
                   readOnly
                   disabled
                   className="bg-muted"
@@ -326,30 +339,54 @@ export default function EditItemPage() {
             </CardContent>
           </Card>
 
-          {/* 图片链接 */}
+          {/* Icon Selection */}
           <Card>
             <CardHeader>
-              <CardTitle>图片链接（可选）</CardTitle>
+              <CardTitle>Icon</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2">
-              <Label htmlFor="imageUrl">图片URL</Label>
-              <Input
-                id="imageUrl"
-                type="url"
-                value={formData.imageUrl}
-                onChange={(e) => updateField('imageUrl', e.target.value)}
-                placeholder="https://example.com/image.jpg"
-              />
+            <CardContent>
+              <div className="flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg border text-2xl">
+                  {formData.icon}
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowIconPicker(!showIconPicker)}
+                >
+                  {showIconPicker ? 'Hide Icons' : 'Select Icon'}
+                </Button>
+              </div>
+
+              {showIconPicker && (
+                <div className="mt-4 grid grid-cols-10 gap-2">
+                  {ITEM_ICONS.map((icon) => (
+                    <button
+                      key={icon}
+                      type="button"
+                      onClick={() => {
+                        updateField('icon', icon);
+                        setShowIconPicker(false);
+                      }}
+                      className={`flex h-10 w-10 items-center justify-center rounded-lg border text-xl transition-colors hover:bg-accent ${
+                        formData.icon === icon ? 'bg-primary text-primary-foreground' : ''
+                      }`}
+                    >
+                      {icon}
+                    </button>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
 
           {/* 操作按钮 */}
           <div className="flex gap-3">
             <Button onClick={handleSave} disabled={saving}>
-              {saving ? '保存中...' : '保存修改'}
+              {saving ? 'Saving...' : 'Save Changes'}
             </Button>
             <Button variant="outline" onClick={() => router.push(`/items/${itemId}`)}>
-              取消
+              Cancel
             </Button>
           </div>
         </div>

@@ -38,16 +38,16 @@ export function ItemCard({
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <p className="text-2xl font-bold text-primary">¥{value.toLocaleString()}</p>
-          <p className="text-sm text-muted-foreground">购买日期: {purchaseDate}</p>
+          <p className="text-sm text-muted-foreground">Purchase Date: {purchaseDate}</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={() => onEdit?.(id)} className="flex-1">
             <Edit className="mr-1 h-4 w-4" />
-            编辑
+            Edit
           </Button>
           <Button variant="default" size="sm" onClick={() => onView?.(id)} className="flex-1">
             <Eye className="mr-1 h-4 w-4" />
-            查看
+            View
           </Button>
         </div>
       </CardContent>

@@ -12,7 +12,7 @@ export function AuthLayout({ children, className }: AuthLayoutProps) {
       <div className="w-full max-w-md space-y-6">
         <div className="text-center">
           <h1 className="text-2xl font-bold">Totali</h1>
-          <p className="text-muted-foreground">个人物品价值追踪系统</p>
+          <p className="text-muted-foreground">Personal Item Value Tracking System</p>
         </div>
         {children}
       </div>

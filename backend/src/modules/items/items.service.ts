@@ -107,6 +107,7 @@ export class ItemsService {
       status: this.convertItemStatus(item.status),
       notes: item.notes,
       imageUrl: item.imageUrl,
+      icon: item.icon,
       soldPrice: item.soldPrice ? this.toNumber(item.soldPrice) : null,
       soldDate: item.soldDate,
       createdAt: item.createdAt,
@@ -158,6 +159,7 @@ export class ItemsService {
           expectedLife: dto.expectedLife,
           notes: dto.notes,
           imageUrl: dto.imageUrl,
+          icon: dto.icon,
         },
         include: {
           category: true, // 包含分类信息 - Include category info
@@ -327,6 +329,7 @@ export class ItemsService {
           ...(dto.expectedLife !== undefined && { expectedLife: dto.expectedLife }),
           ...(dto.notes !== undefined && { notes: dto.notes }),
           ...(dto.imageUrl !== undefined && { imageUrl: dto.imageUrl }),
+          ...(dto.icon !== undefined && { icon: dto.icon }),
           ...(dto.status !== undefined && { status: dto.status }),
           ...(dto.soldPrice !== undefined && { soldPrice: dto.soldPrice }),
           ...(dto.soldDate !== undefined && { soldDate: dto.soldDate }),

@@ -28,6 +28,7 @@ export interface Item {
   expectedLife?: number | null;
   notes?: string | null;
   imageUrl?: string | null;
+  icon?: string | null;
   status: 'ACTIVE' | 'IDLE' | 'EXPIRED' | 'SOLD';
   soldPrice?: number | null;
   soldDate?: string | null;

@@ -66,4 +66,13 @@ export class CreateItemDto {
   @IsUrl()
   @MaxLength(500)
   imageUrl?: string;
+
+  @ApiPropertyOptional({
+    description: '物品图标 - Item icon',
+    example: '📱',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(10)
+  icon?: string;
 }

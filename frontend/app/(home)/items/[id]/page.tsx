@@ -27,7 +27,7 @@ export default function ItemDetailPage() {
   const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
 
-  // 状态管理
+  // State management
   const [item, setItem] = useState<ItemWithStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -35,14 +35,14 @@ export default function ItemDetailPage() {
 
   const itemId = params?.id as string;
 
-  // 检查登录状态
+  // Check login status
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/auth/signin');
     }
   }, [user, authLoading, router]);
 
-  // 获取物品详情
+  // Fetch item details
   useEffect(() => {
     const fetchItem = async () => {
       if (!user || !itemId) return;
@@ -52,22 +52,22 @@ export default function ItemDetailPage() {
         const response = await itemsApi.getItem(itemId);
 
         if (response.success && response.data) {
-          // 需要计算统计数据
+          // Calculate statistics
           const itemData = response.data as ItemWithStats;
           setItem(itemData);
         } else {
           toast({
-            title: '获取失败',
-            description: response.error || '无法获取物品信息',
+            title: 'Failed to Load',
+            description: response.error || 'Unable to load item information',
             variant: 'destructive',
           });
           router.push('/');
         }
       } catch (error) {
-        console.error('获取物品详情失败:', error);
+        console.error('Failed to fetch item details:', error);
         toast({
-          title: '加载失败',
-          description: '无法加载物品信息，请重试',
+          title: 'Loading Failed',
+          description: 'Unable to load item information, please try again',
           variant: 'destructive',
         });
         router.push('/');
@@ -81,7 +81,7 @@ export default function ItemDetailPage() {
     }
   }, [user, itemId, toast, router]);
 
-  // 删除物品
+  // Delete item
   const handleDelete = async () => {
     if (!item) return;
 
@@ -91,22 +91,22 @@ export default function ItemDetailPage() {
 
       if (response.success) {
         toast({
-          title: '删除成功',
-          description: '物品已成功删除',
+          title: 'Deleted Successfully',
+          description: 'Item has been deleted',
         });
         router.push('/');
       } else {
         toast({
-          title: '删除失败',
-          description: response.error || '无法删除物品',
+          title: 'Delete Failed',
+          description: response.error || 'Unable to delete item',
           variant: 'destructive',
         });
       }
     } catch (error) {
-      console.error('删除物品失败:', error);
+      console.error('Failed to delete item:', error);
       toast({
-        title: '删除失败',
-        description: '请稍后重试',
+        title: 'Delete Failed',
+        description: 'Please try again later',
         variant: 'destructive',
       });
     } finally {
@@ -115,46 +115,47 @@ export default function ItemDetailPage() {
     }
   };
 
-  // 编辑物品
+  // Edit item
   const handleEdit = () => {
     router.push(`/items/${itemId}/edit`);
   };
 
-  // 获取状态信息
+  // Get status info
   const getStatusInfo = (status: string) => {
     const statusMap = {
-      ACTIVE: { label: '服役中', variant: 'default' as const },
-      IDLE: { label: '闲置', variant: 'secondary' as const },
-      EXPIRED: { label: '已过期', variant: 'destructive' as const },
-      SOLD: { label: '已卖出', variant: 'outline' as const },
+      ACTIVE: { label: 'Active', variant: 'default' as const },
+      IDLE: { label: 'Idle', variant: 'secondary' as const },
+      EXPIRED: { label: 'Expired', variant: 'destructive' as const },
+      SOLD: { label: 'Sold', variant: 'outline' as const },
+      RETIRED: { label: 'Retired', variant: 'outline' as const },
     };
     return statusMap[status as keyof typeof statusMap] || statusMap.ACTIVE;
   };
 
-  // 加载中
+  // Loading state
   if (loading || authLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto mb-4" />
-          <p className="text-sm text-muted-foreground">加载中...</p>
+          <p className="text-sm text-muted-foreground">Loading...</p>
         </div>
       </div>
     );
   }
 
-  // 未登录
+  // Not logged in
   if (!user) {
     return null;
   }
 
-  // 物品不存在
+  // Item not found
   if (!item) {
     return null;
   }
 
   const statusInfo = getStatusInfo(item.status);
-  const categoryIcon = item.category?.icon || '📦';
+  const itemIcon = item.icon || '📦';
 
   return (
     <div className="min-h-screen bg-background">
@@ -164,7 +165,7 @@ export default function ItemDetailPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="flex h-16 w-16 items-center justify-center rounded-lg border bg-background text-3xl">
-                {categoryIcon}
+                {itemIcon}
               </div>
               <div>
                 <h1 className="text-2xl font-semibold">{item.name}</h1>
@@ -185,38 +186,38 @@ export default function ItemDetailPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <span>ℹ️</span>
-                基础信息
+                Basic Information
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-1">
-                  <div className="text-sm text-muted-foreground">分类</div>
-                  <div className="text-base font-medium">{item.category?.name || '未分类'}</div>
+                  <div className="text-sm text-muted-foreground">Category</div>
+                  <div className="text-base font-medium">{item.category?.name || 'Uncategorized'}</div>
                 </div>
                 <div className="space-y-1">
-                  <div className="text-sm text-muted-foreground">购买价格</div>
+                  <div className="text-sm text-muted-foreground">Purchase Price</div>
                   <div className="text-base font-medium text-primary">¥{item.purchasePrice}</div>
                 </div>
                 <div className="space-y-1">
-                  <div className="text-sm text-muted-foreground">购买日期</div>
+                  <div className="text-sm text-muted-foreground">Purchase Date</div>
                   <div className="text-base font-medium">
                     {new Date(item.purchaseDate).toLocaleDateString('zh-CN')}
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <div className="text-sm text-muted-foreground">已拥有天数</div>
-                  <div className="text-base font-medium">{item.daysUsed} 天</div>
+                  <div className="text-sm text-muted-foreground">Days Owned</div>
+                  <div className="text-base font-medium">{item.daysUsed} days</div>
                 </div>
                 {item.expectedLife && (
                   <div className="space-y-1">
-                    <div className="text-sm text-muted-foreground">预计使用寿命</div>
-                    <div className="text-base font-medium">{item.expectedLife} 天</div>
+                    <div className="text-sm text-muted-foreground">Expected Lifespan</div>
+                    <div className="text-base font-medium">{item.expectedLife} days</div>
                   </div>
                 )}
                 <div className="space-y-1">
-                  <div className="text-sm text-muted-foreground">日均成本（理论）</div>
-                  <div className="text-base font-medium">¥{item.dailyCost.toFixed(2)}/天</div>
+                  <div className="text-sm text-muted-foreground">Actual Daily Cost</div>
+                  <div className="text-2xl font-bold">¥{item.dailyCost.toFixed(2)}</div>
                 </div>
               </div>
 
@@ -224,7 +225,7 @@ export default function ItemDetailPage() {
                 <>
                   <Separator className="my-4" />
                   <div className="space-y-1">
-                    <div className="text-sm text-muted-foreground">备注</div>
+                    <div className="text-sm text-muted-foreground">Notes</div>
                     <div className="text-base">{item.notes}</div>
                   </div>
                 </>
@@ -237,25 +238,25 @@ export default function ItemDetailPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <span>📊</span>
-                使用统计
+                Usage Statistics
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid gap-4 sm:grid-cols-3">
                 <div className="rounded-lg bg-muted p-4 text-center">
                   <div className="text-2xl font-bold">{item.daysUsed}</div>
-                  <div className="text-sm text-muted-foreground">使用天数</div>
+                  <div className="text-sm text-muted-foreground">Days Used</div>
                 </div>
                 <div className="rounded-lg bg-muted p-4 text-center">
                   <div className="text-2xl font-bold">¥{item.dailyCost.toFixed(1)}</div>
-                  <div className="text-sm text-muted-foreground">实际日均成本</div>
+                  <div className="text-sm text-muted-foreground">Actual Daily Cost</div>
                 </div>
                 {item.usageEfficiency !== null && (
                   <div className="rounded-lg bg-muted p-4 text-center">
                     <div className="text-2xl font-bold">
                       {(item.usageEfficiency * 100).toFixed(0)}%
                     </div>
-                    <div className="text-sm text-muted-foreground">使用效率</div>
+                    <div className="text-sm text-muted-foreground">Usage Efficiency</div>
                   </div>
                 )}
               </div>
@@ -266,7 +267,7 @@ export default function ItemDetailPage() {
                     variant={item.usageEfficiency >= 0.7 ? 'default' : 'secondary'}
                     className="gap-1"
                   >
-                    {item.usageEfficiency >= 0.7 ? '✅ 高效率' : '⚠️ 中效率'}
+                    {item.usageEfficiency >= 0.7 ? '✅ High Efficiency' : '⚠️ Medium Efficiency'}
                   </Badge>
                 </div>
               )}
@@ -277,15 +278,15 @@ export default function ItemDetailPage() {
           <div className="flex flex-wrap gap-3">
             <Button variant="outline" onClick={() => router.push('/')}>
               <ArrowLeft className="mr-2 h-4 w-4" />
-              返回
+              Back
             </Button>
             <Button variant="outline" onClick={handleEdit}>
               <Edit className="mr-2 h-4 w-4" />
-              编辑
+              Edit
             </Button>
             <Button variant="destructive" onClick={() => setShowDeleteDialog(true)}>
               <Trash2 className="mr-2 h-4 w-4" />
-              删除
+              Delete
             </Button>
           </div>
         </div>
@@ -295,15 +296,15 @@ export default function ItemDetailPage() {
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>确认删除</AlertDialogTitle>
+            <AlertDialogTitle>Confirm Delete</AlertDialogTitle>
             <AlertDialogDescription>
-              您确定要删除「{item.name}」吗？此操作无法撤销。
+              Are you sure you want to delete &quot;{item.name}&quot;? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>取消</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} disabled={deleting} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              {deleting ? '删除中...' : '确认删除'}
+              {deleting ? 'Deleting...' : 'Confirm Delete'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

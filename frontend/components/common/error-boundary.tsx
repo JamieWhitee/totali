@@ -46,9 +46,9 @@ export class ErrorBoundary extends Component<Props, State> {
           <Alert className="max-w-md">
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription className="mt-2">
-              <p className="font-medium">出现了一个错误</p>
+              <p className="font-medium">An error occurred</p>
               <p className="text-sm text-muted-foreground mt-1">
-                {this.state.error?.message || '未知错误'}
+                {this.state.error?.message || 'Unknown error'}
               </p>
               <Button
                 variant="outline"
@@ -57,7 +57,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 onClick={() => this.setState({ hasError: false, error: undefined })}
               >
                 <RefreshCw className="w-4 h-4 mr-2" />
-                重试
+                Retry
               </Button>
             </AlertDescription>
           </Alert>

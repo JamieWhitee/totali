@@ -14,7 +14,7 @@ import { useAuth } from '@/lib/hooks/use-auth';
 import { itemsApi, type Category } from '@/lib/api/items-api';
 import { useToast } from '@/hooks/use-toast';
 
-// 物品图标列表 - Item icons
+// Item icons list
 const ITEM_ICONS = [
   '📱', '💻', '🖥️', '⌚', '🎧', '🔌',
   '📺', '🎮', '📷', '🎒', '🧳', '👟',
@@ -22,7 +22,7 @@ const ITEM_ICONS = [
   '🪚', '🧰'
 ];
 
-// 表单数据接口 - Form data interface
+// Form data interface
 interface FormData {
   name: string;
   categoryId: string;
@@ -45,7 +45,7 @@ export default function NewItemPage() {
   const [saving, setSaving] = useState(false);
   const [showIconPicker, setShowIconPicker] = useState(false);
 
-  // 表单数据 - Form data
+  // Form data
   const [formData, setFormData] = useState<FormData>({
     name: '',
     categoryId: '',
@@ -59,19 +59,19 @@ export default function NewItemPage() {
     status: 'ACTIVE',
   });
 
-  // 计算的日均成本 - Calculated daily cost
+  // Calculated daily cost
   const dailyCost = formData.purchasePrice
     ? (parseFloat(formData.purchasePrice) / 365).toFixed(2)
     : '0.00';
 
-  // 检查登录状态
+  // Check login status
   useEffect(() => {
     if (!loading && !user) {
       router.push('/auth/signin');
     }
   }, [user, loading, router]);
 
-  // 获取分类列表
+  // Fetch categories
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -81,16 +81,16 @@ export default function NewItemPage() {
           setCategories(response.data);
         } else {
           toast({
-            title: '获取分类失败',
-            description: response.error || '未知错误',
+            title: 'Failed to Load Categories',
+            description: response.error || 'Unknown error',
             variant: 'destructive',
           });
         }
       } catch (error) {
-        console.error('获取分类失败:', error);
+        console.error('Failed to fetch categories:', error);
         toast({
-          title: '获取分类失败',
-          description: error instanceof Error ? error.message : '请检查网络连接或重新登录',
+          title: 'Failed to Load Categories',
+          description: error instanceof Error ? error.message : 'Please check network connection or re-login',
           variant: 'destructive',
         });
       } finally {
@@ -103,18 +103,18 @@ export default function NewItemPage() {
     }
   }, [user, toast]);
 
-  // 更新表单字段
+  // Update form field
   const updateField = (field: keyof FormData, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  // 保存物品
+  // Save item
   const handleSave = async () => {
-    // 验证必填字段
+    // Validate required fields
     if (!formData.name || !formData.categoryId || !formData.purchasePrice || !formData.purchaseDate) {
       toast({
-        title: '验证失败',
-        description: '请填写所有必填字段',
+        title: 'Validation Failed',
+        description: 'Please fill in all required fields',
         variant: 'destructive',
       });
       return;
@@ -129,6 +129,7 @@ export default function NewItemPage() {
         purchaseDate: formData.purchaseDate,
         notes: formData.notes || undefined,
         imageUrl: formData.imageUrl || undefined,
+        icon: formData.icon,
         expectedLife: formData.enableExpectedLife && formData.expectedLife
           ? parseInt(formData.expectedLife)
           : undefined,
@@ -138,22 +139,22 @@ export default function NewItemPage() {
 
       if (response.success) {
         toast({
-          title: '创建成功',
-          description: '物品已成功添加',
+          title: 'Created Successfully',
+          description: 'Item has been added',
         });
         router.push('/');
       } else {
         toast({
-          title: '创建失败',
-          description: response.error || '未知错误',
+          title: 'Creation Failed',
+          description: response.error || 'Unknown error',
           variant: 'destructive',
         });
       }
     } catch (error) {
-      console.error('创建物品失败:', error);
+      console.error('Failed to create item:', error);
       toast({
-        title: '创建失败',
-        description: '请检查网络连接后重试',
+        title: 'Creation Failed',
+        description: 'Please check network connection and try again',
         variant: 'destructive',
       });
     } finally {
@@ -161,19 +162,19 @@ export default function NewItemPage() {
     }
   };
 
-  // 加载中状态
+  // Loading state
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto mb-4" />
-          <p className="text-sm text-muted-foreground">加载中...</p>
+          <p className="text-sm text-muted-foreground">Loading...</p>
         </div>
       </div>
     );
   }
 
-  // 未登录
+  // Not logged in
   if (!user) {
     return null;
   }
@@ -185,11 +186,11 @@ export default function NewItemPage() {
         <div className="mb-6 flex items-center gap-4">
           <Button variant="outline" size="sm" onClick={() => router.push('/')}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            返回
+            Back
           </Button>
           <div>
-            <h1 className="text-2xl font-semibold">添加物品</h1>
-            <p className="text-sm text-muted-foreground">记录您的个人物品信息</p>
+            <h1 className="text-2xl font-semibold">Add Item</h1>
+            <p className="text-sm text-muted-foreground">Record your personal item information</p>
           </div>
         </div>
 
@@ -200,27 +201,27 @@ export default function NewItemPage() {
             {/* 基础信息 - Basic Info */}
             <Card>
               <CardHeader>
-                <CardTitle>基础信息</CardTitle>
+                <CardTitle>Basic Information</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">物品名称 *</Label>
+                  <Label htmlFor="name">Item Name *</Label>
                   <Input
                     id="name"
-                    placeholder="如：iPhone 15 Pro"
+                    placeholder="e.g., iPhone 15 Pro"
                     value={formData.name}
                     onChange={(e) => updateField('name', e.target.value)}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="category">分类 *</Label>
+                  <Label htmlFor="category">Category *</Label>
                   {loadingCategories ? (
-                    <div className="text-sm text-muted-foreground">加载分类中...</div>
+                    <div className="text-sm text-muted-foreground">Loading categories...</div>
                   ) : (
                     <Select value={formData.categoryId} onValueChange={(value) => updateField('categoryId', value)}>
                       <SelectTrigger>
-                        <SelectValue placeholder="请选择分类" />
+                        <SelectValue placeholder="Please select a category" />
                       </SelectTrigger>
                       <SelectContent>
                         {categories.map((cat) => (
@@ -234,10 +235,10 @@ export default function NewItemPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="notes">备注</Label>
+                  <Label htmlFor="notes">Notes</Label>
                   <Textarea
                     id="notes"
-                    placeholder="可选，简单描述该物品"
+                    placeholder="Optional, brief description of the item"
                     rows={3}
                     value={formData.notes}
                     onChange={(e) => updateField('notes', e.target.value)}
@@ -249,12 +250,12 @@ export default function NewItemPage() {
             {/* 购买与保修 - Purchase and Warranty */}
             <Card>
               <CardHeader>
-                <CardTitle>购买与保修</CardTitle>
+                <CardTitle>Purchase Information</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="purchasePrice">购买价格 *</Label>
+                    <Label htmlFor="purchasePrice">Purchase Price *</Label>
                     <Input
                       id="purchasePrice"
                       type="number"
@@ -264,7 +265,7 @@ export default function NewItemPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="purchaseDate">购买日期 *</Label>
+                    <Label htmlFor="purchaseDate">Purchase Date *</Label>
                     <Input
                       id="purchaseDate"
                       type="date"
@@ -282,14 +283,14 @@ export default function NewItemPage() {
                       onCheckedChange={(checked) => updateField('enableExpectedLife', checked as boolean)}
                     />
                     <Label htmlFor="enableExpectedLife" className="font-normal cursor-pointer">
-                      启用预计使用时间
+                      Enable expected lifespan
                     </Label>
                   </div>
                   {formData.enableExpectedLife && (
                     <Input
                       id="expectedLife"
                       type="number"
-                      placeholder="预计使用天数"
+                      placeholder="Expected days of use"
                       value={formData.expectedLife}
                       onChange={(e) => updateField('expectedLife', e.target.value)}
                     />
@@ -297,10 +298,10 @@ export default function NewItemPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="dailyCost">日均成本（自动估算）</Label>
+                  <Label htmlFor="dailyCost">Daily Cost (Auto-calculated)</Label>
                   <Input
                     id="dailyCost"
-                    value={dailyCost ? `¥${dailyCost}/天` : ''}
+                    value={dailyCost ? `¥${dailyCost}/day` : ''}
                     readOnly
                     disabled
                     className="bg-muted"
@@ -312,7 +313,7 @@ export default function NewItemPage() {
             {/* 图标选择 - Icon Selection */}
             <Card>
               <CardHeader>
-                <CardTitle>图标</CardTitle>
+                <CardTitle>Icon</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-4">
@@ -324,7 +325,7 @@ export default function NewItemPage() {
                     variant="outline"
                     onClick={() => setShowIconPicker(!showIconPicker)}
                   >
-                    {showIconPicker ? '收起图标' : '选择图标'}
+                    {showIconPicker ? 'Hide Icons' : 'Select Icon'}
                   </Button>
                 </div>
 
@@ -350,30 +351,13 @@ export default function NewItemPage() {
               </CardContent>
             </Card>
 
-            {/* 图片链接（可选） - Image URL (Optional) */}
-            <Card>
-              <CardHeader>
-                <CardTitle>图片链接（可选）</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <Label htmlFor="imageUrl">图片URL</Label>
-                <Input
-                  id="imageUrl"
-                  type="url"
-                  placeholder="https://example.com/image.jpg"
-                  value={formData.imageUrl}
-                  onChange={(e) => updateField('imageUrl', e.target.value)}
-                />
-              </CardContent>
-            </Card>
-
             {/* 操作按钮 - Actions */}
             <div className="flex gap-3">
               <Button onClick={handleSave} disabled={saving}>
-                {saving ? '保存中...' : '保存物品'}
+                {saving ? 'Saving...' : 'Save Item'}
               </Button>
               <Button variant="outline" onClick={() => router.push('/')}>
-                取消
+                Cancel
               </Button>
             </div>
           </div>
@@ -382,31 +366,31 @@ export default function NewItemPage() {
           <div className="lg:col-span-1">
             <Card className="sticky top-6">
               <CardHeader>
-                <CardTitle>摘要预览</CardTitle>
+                <CardTitle>Summary Preview</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">物品名称</span>
+                  <span className="text-muted-foreground">Item Name</span>
                   <span className="font-medium">{formData.name || '—'}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">分类</span>
+                  <span className="text-muted-foreground">Category</span>
                   <span className="font-medium">
                     {categories.find((c) => c.id === formData.categoryId)?.name || '—'}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">购买价格</span>
+                  <span className="text-muted-foreground">Purchase Price</span>
                   <span className="font-medium">
                     {formData.purchasePrice ? `¥${formData.purchasePrice}` : '—'}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">估计日均成本</span>
-                  <span className="font-medium">{dailyCost ? `¥${dailyCost}/天` : '—'}</span>
+                  <span className="text-muted-foreground">Estimated Daily Cost</span>
+                  <span className="font-medium">{dailyCost ? `¥${dailyCost}/day` : '—'}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">图标</span>
+                  <span className="text-muted-foreground">Icon</span>
                   <span className="text-xl">{formData.icon}</span>
                 </div>
               </CardContent>
