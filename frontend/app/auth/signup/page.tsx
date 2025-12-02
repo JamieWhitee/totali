@@ -57,9 +57,9 @@ export default function SignUpPage() {
       } else {
         setSuccess('Registration successful! Please check your email to confirm your account.');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Registration error:', err);
-      setError(err.message || 'Registration failed');
+      setError(err instanceof Error ? err.message : 'Registration failed');
     } finally {
       setIsLoading(false);
     }

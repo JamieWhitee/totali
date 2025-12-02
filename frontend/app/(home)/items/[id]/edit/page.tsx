@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/lib/hooks/use-auth';
-import { itemsApi, type Category, type Item, type CreateItemDto } from '@/lib/api/items-api';
+import { itemsApi, type Category, type Item } from '@/lib/api/items-api';
 import { useToast } from '@/hooks/use-toast';
 
 // Item icons list
@@ -156,7 +156,7 @@ export default function EditItemPage() {
 
     setSaving(true);
     try {
-      const updateData: any = {
+      const updateData = {
         name: formData.name,
         categoryId: formData.categoryId,
         purchasePrice: parseFloat(formData.purchasePrice),

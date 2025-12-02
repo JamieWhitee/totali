@@ -29,8 +29,8 @@ export default function SignInPage() {
     try {
       await signIn(email, password);
       router.push('/'); // 登录成功后跳转到首页
-    } catch (err: any) {
-      setError(err.message || 'Login failed');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Login failed');
     } finally {
       setIsLoading(false);
     }
