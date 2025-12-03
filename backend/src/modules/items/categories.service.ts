@@ -20,18 +20,23 @@ export class CategoriesService {
    * 获取用户分类列表 - Get user categories
    * 包含系统预设分类和用户自定义分类 - Includes system categories and user custom categories
    */
-  async getCategories(userId: string): Promise<ApiResponseDto<CategoryWithStatsDto[]>> {
+  async getCategories(userId: string | null): Promise<ApiResponseDto<CategoryWithStatsDto[]>> {
     try {
-      this.logger.log(`Getting categories for user: ${userId}`);
+      this.logger.log(`Getting categories for user: ${userId || 'anonymous'}`);
 
-      // 查询分类：系统预设 OR 用户创建的
+      // 构建查询条件：系统预设分类 + 用户自定义分类（如果已认证）
+      const whereCondition = userId
+        ? {
+            OR: [
+              { isSystem: true }, // 系统预设分类（所有人可见）
+              { userId, isSystem: false }, // 用户自己创建的分类
+            ],
+          }
+        : { isSystem: true }; // 未认证用户只能看到系统分类
+
+      // 查询分类
       const categories = await this.prisma.category.findMany({
-        where: {
-          OR: [
-            { isSystem: true }, // 系统预设分类（所有人可见）
-            { userId, isSystem: false }, // 用户自己创建的分类
-          ],
-        },
+        where: whereCondition,
         include: {
           _count: {
             select: { items: true }, // 统计该分类下的物品数量

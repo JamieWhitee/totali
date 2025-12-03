@@ -19,8 +19,17 @@ async function bootstrap() {
   });
 
   // CORS配置 - 必须在helmet之前配置
+  const allowedOrigins = ['http://localhost:3000', 'https://totali-front.vercel.app', process.env.FRONTEND_URL].filter(Boolean);
+
   app.enableCors({
-    origin: ['http://localhost:3000', process.env.FRONTEND_URL || 'http://localhost:3000'],
+    origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization'],
     credentials: true,
