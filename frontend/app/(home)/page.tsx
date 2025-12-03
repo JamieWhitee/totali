@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
-import { Plus, FileText, BarChart3, Settings, LogOut, Package } from 'lucide-react';
+import { Plus, BarChart3, LogOut, Package } from 'lucide-react';
 import { useAuth } from '@/lib/hooks/use-auth';
 import { useRouter } from 'next/navigation';
 import { itemsApi, type ItemWithStats, type UserItemsOverview } from '@/lib/api/items-api';
@@ -198,18 +198,20 @@ export default function HomePage() {
             <Plus className="h-4 w-4" />
             Add Item
           </Button>
-          <Button variant="outline" className="gap-2">
+          {/* Temporarily hidden - not yet implemented */}
+          {/* <Button variant="outline" className="gap-2">
             <FileText className="h-4 w-4" />
             Usage Records
-          </Button>
+          </Button> */}
           <Button variant="outline" className="gap-2" onClick={() => router.push('/analytics')}>
             <BarChart3 className="h-4 w-4" />
             Analytics
           </Button>
-          <Button variant="outline" className="gap-2">
+          {/* Temporarily hidden - not yet implemented */}
+          {/* <Button variant="outline" className="gap-2">
             <Settings className="h-4 w-4" />
             Settings
-          </Button>
+          </Button> */}
         </div>
 
         {/* Stats Grid */}
