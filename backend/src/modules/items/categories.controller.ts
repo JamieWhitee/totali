@@ -20,8 +20,6 @@ interface RequestWithUser {
  */
 @ApiTags('Categories - 分类管理')
 @Controller('categories')
-@UseGuards(AuthGuard)
-@ApiBearerAuth()
 export class CategoriesController {
   private readonly logger = new Logger(CategoriesController.name);
 
@@ -30,6 +28,7 @@ export class CategoriesController {
   /**
    * 获取分类列表 - Get categories list
    * GET /categories
+   * 注意：此端点不需要认证，返回系统分类。如果已认证，还会返回用户自定义分类。
    */
   @Get()
   @ApiOperation({
@@ -42,8 +41,9 @@ export class CategoriesController {
     type: [CategoryWithStatsDto],
   })
   async getCategories(@Request() req: RequestWithUser): Promise<ApiResponseDto<CategoryWithStatsDto[]>> {
-    const userId: string = req.user.id;
-    this.logger.log(`GET /categories - User: ${userId}`);
+    // 如果用户已认证，返回系统分类+用户分类；否则只返回系统分类
+    const userId: string = req.user?.id || null;
+    this.logger.log(`GET /categories - User: ${userId || 'anonymous'}`);
     return this.categoriesService.getCategories(userId);
   }
 
@@ -52,6 +52,8 @@ export class CategoriesController {
    * POST /categories
    */
   @Post()
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: '创建分类 - Create category',
     description: '创建用户自定义分类 - Create user custom category',
@@ -76,6 +78,8 @@ export class CategoriesController {
    * DELETE /categories/:id
    */
   @Delete(':id')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: '删除分类 - Delete category',
     description: '删除用户自定义分类（不能删除系统分类和有关联物品的分类）',
@@ -107,6 +111,8 @@ export class CategoriesController {
    * GET /categories/:id/stats
    */
   @Get(':id/stats')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: '获取分类统计 - Get category statistics',
     description: '获取指定分类的统计信息（物品数量等）',
